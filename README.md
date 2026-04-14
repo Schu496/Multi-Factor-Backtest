@@ -28,6 +28,8 @@ A professional-grade, modular Python framework for constructing, backtesting, an
 
 *Run `python main.py` to generate the full 4-page PDF tearsheet in `reporting/output/`*
 
+[View Full Tearsheet PDF](tearsheet.pdf)
+
 The tearsheet includes:
 - **Page 1** — Full performance summary table (strategy vs benchmark)
 - **Page 2** — Cumulative returns and drawdown chart (2010–2024)
