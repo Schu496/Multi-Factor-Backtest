@@ -1,0 +1,165 @@
+════════════════════════════════════════════════════════════════
+  MULTI-FACTOR EQUITY STRATEGY BACKTEST — RUN INSTRUCTIONS
+════════════════════════════════════════════════════════════════
+
+WHAT THIS PROJECT DOES
+───────────────────────
+This project tests a stock-picking strategy on 15 years of real
+S&P 500 market data (2010–2024). It scores every S&P 500 stock
+on 5 factors (Value, Momentum, Quality, Low Volatility, Size),
+picks the top 50 each month, and shows you how that portfolio
+would have performed compared to just buying the S&P 500 index.
+
+The final output is a professional PDF tearsheet — the same kind
+of report a hedge fund would present to investors.
+
+
+BEFORE YOU START
+────────────────
+Make sure you have completed the one-time setup:
+
+  1. Install Python 3.10 or higher from python.org
+  2. Open VS Code and open your project folder
+  3. Open the VS Code terminal (Terminal → New Terminal)
+  4. Run these commands once to set up your environment:
+
+       python -m venv venv
+       venv\Scripts\activate
+       pip install -r requirements.txt
+
+  You only need to do this once. After that, just activate
+  the virtual environment each session:
+
+       venv\Scripts\activate
+
+NOTE: The venv activation may not be needed if VS Code auto-selects Python 3.14
+
+STEP 1 — RUN THE SMOKE TEST FIRST (recommended)
+────────────────────────────────────────────────
+The smoke test runs the full pipeline on just 10 stocks and
+2 years of data. It completes in about 3-5 minutes and confirms
+everything is working before the long run.
+
+  In the VS Code terminal, type:
+
+       $env:PYTHONUTF8="1"; python tests/test_pipeline.py
+
+  What you should see:
+    ✓ Data ingestion passed
+    ✓ Factor construction passed
+    ✓ Portfolio construction passed
+    ✓ Backtest engine passed
+    ✓ Performance analytics passed
+    ✓ Reporting passed
+    ALL TESTS PASSED — ready for full run!
+
+  If any test fails, read the error message carefully.
+  The most common issues and fixes are listed at the bottom
+  of this file.
+
+
+STEP 2 — RUN THE FULL BACKTEST
+───────────────────────────────
+Once the smoke test passes, run the full 15-year backtest:
+
+  In the VS Code terminal, type:
+
+       $env:PYTHONUTF8="1"; python main.py
+
+  IMPORTANT: The FIRST time you run this, it will download
+  15 years of data for all 500 S&P 500 stocks from Yahoo Finance.
+  This takes approximately:
+    - Price data download:       5-10 minutes
+    - Fundamental data download: 20-40 minutes
+    - Backtest simulation:       10-20 minutes
+    - Total first run:           ~1 hour
+
+  On all subsequent runs, the data loads from your local files
+  in seconds. Only the backtest simulation reruns (~10-20 min).
+
+  You will see a live progress log in the terminal showing
+  exactly what stage the program is at.
+
+
+STEP 3 — VIEW YOUR RESULTS
+────────────────────────────
+When the run completes you will see:
+  "✓ Backtest complete. Results saved to reporting/output/"
+
+Navigate to this folder in VS Code's file explorer:
+
+  reporting/
+  └── output/
+      ├── tearsheet.pdf              ← MAIN OUTPUT — open this first
+      ├── 01_cumulative_returns.png  ← Growth of $1M chart
+      ├── 02_drawdown.png            ← Drawdown history chart
+      ├── 03_rolling_sharpe.png      ← Rolling risk-adjusted returns
+      ├── 04_monthly_heatmap.png     ← Monthly returns calendar
+      ├── 05_factor_attribution.png  ← Which factors contributed
+      └── 06_annual_returns.png      ← Year by year vs S&P 500
+
+  Open tearsheet.pdf for the complete 4-page professional report.
+
+
+WHAT THE OUTPUT MEANS
+──────────────────────
+Page 1 — Summary Statistics
+  A table comparing our strategy vs SPY (S&P 500 benchmark).
+  Key numbers to look for:
+    CAGR         : annualized return. Higher than SPY = outperformed.
+    Sharpe Ratio : return per unit of risk. Above 1.0 is good.
+    Max Drawdown : worst loss from peak to trough.
+    Alpha        : return earned beyond what market exposure explains.
+
+Page 2 — Cumulative Returns + Drawdown
+  The blue line is our portfolio. The gray dashed line is SPY.
+  Blue shading above the gray line = periods of outperformance.
+
+Page 3 — Rolling Metrics + Annual Returns
+  Shows whether the strategy was consistent year after year,
+  or whether all the gains came from one or two lucky years.
+
+Page 4 — Monthly Heatmap + Factor Attribution
+  Green cells = positive months. Red cells = negative months.
+  The factor attribution bars show which of the 5 factors
+  contributed most to returns.
+
+
+CHANGING THE STRATEGY SETTINGS
+────────────────────────────────
+All strategy parameters are in one file: configs/strategy.yaml
+
+Open it in VS Code to change:
+  portfolio_size: 50       → try 30 or 75
+  rebalance_freq: monthly  → change to "quarterly"
+  weighting: equal_weight  → change to "risk_parity"
+  transaction_cost_bps: 10 → raise to 20 to model higher costs
+
+  Under factors:, you can change the weights.
+  All factor weights must add up to 1.0.
+
+After changing the config, just run python main.py again.
+The data is already cached so it will only re-run the simulation.
+
+
+COMMON ERRORS AND FIXES
+────────────────────────
+Error: "ModuleNotFoundError: No module named 'yfinance'"
+  Fix: Run  pip install -r requirements.txt
+
+Error: "(venv)" not showing in terminal
+  Fix: Run  venv\Scripts\activate
+
+Error: "FileNotFoundError: configs/strategy.yaml"
+  Fix: Make sure you are running from the project root folder,
+       not from inside a subfolder.
+
+Error: "database is locked" from yfinance
+  Fix: This is a temporary Yahoo Finance issue. Wait 60 seconds
+       and run again. The data will pick up from where it left off.
+
+Error: Yahoo Finance timeout warnings
+  Fix: These are normal and handled automatically. The code
+       retries failed tickers individually. You can ignore them.
+
+════════════════════════════════════════════════════════════════

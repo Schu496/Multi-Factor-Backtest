@@ -1,0 +1,67 @@
+# ══════════════════════════════════════════════════════════════════
+#  Multi-Factor Equity Strategy — Configuration
+# ══════════════════════════════════════════════════════════════════
+
+# ── Universe ──────────────────────────────────────────────────────
+universe: sp500
+start_date: "2010-01-01"
+end_date:   "2024-12-31"
+benchmark:  "SPY"
+
+# ── Portfolio Construction ────────────────────────────────────────
+portfolio_size: 50             # number of stocks held
+weighting: equal_weight        # options: equal_weight | risk_parity | factor_tilt
+rebalance_freq: monthly        # options: monthly | quarterly
+
+# ── Transaction Costs ─────────────────────────────────────────────
+transaction_cost_bps: 10       # one-way, in basis points
+
+# ── Factor Definitions ────────────────────────────────────────────
+factors:
+
+  value:
+    enabled: true
+    weight: 0.25
+    metrics:
+      pb_ratio:     { direction: -1, weight: 0.40 }   # lower is cheaper
+      ev_ebitda:    { direction: -1, weight: 0.35 }
+      pe_ratio:     { direction: -1, weight: 0.25 }
+
+  momentum:
+    enabled: true
+    weight: 0.25
+    metrics:
+      mom_12_1:     { direction: 1,  weight: 1.00 }   # 12-month return skipping last month
+
+  quality:
+    enabled: true
+    weight: 0.20
+    metrics:
+      roe:          { direction: 1,  weight: 0.40 }   # higher is better
+      gross_margin: { direction: 1,  weight: 0.35 }
+      debt_equity:  { direction: -1, weight: 0.25 }   # lower leverage is better
+
+  low_volatility:
+    enabled: true
+    weight: 0.15
+    metrics:
+      realized_vol: { direction: -1, weight: 0.60 }   # 252-day annualized vol
+      beta:         { direction: -1, weight: 0.40 }   # beta vs S&P 500
+
+  size:
+    enabled: true
+    weight: 0.15
+    metrics:
+      log_mktcap:   { direction: -1, weight: 1.00 }   # smaller cap = higher score
+
+# ── Z-Score Normalization ─────────────────────────────────────────
+zscore:
+  winsorize_pct: 0.01          # winsorize top/bottom 1% before z-scoring
+  cross_sectional: true        # normalize cross-sectionally each period
+
+# ── Output ────────────────────────────────────────────────────────
+output:
+  save_tearsheet: true
+  save_charts:    true
+  output_dir:     "reporting/output"
+  log_level:      "INFO"
